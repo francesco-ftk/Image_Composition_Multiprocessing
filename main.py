@@ -4,9 +4,10 @@ from copy import copy
 import cv2
 import datetime
 import time
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, dump, load
 
-TRANSFORMATIONS = 100
+TRANSFORMATIONS = 200
+
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:
     local_date = datetime.datetime.now()
@@ -111,37 +112,38 @@ if __name__ == '__main__':
     else:
         print("ERROR: foreground not found at: " + foreground_path)
 
-    # start = time.time()
-    # result = data_augmentation(foreground, backgrounds, TRANSFORMATIONS)
-    # end = time.time()
+    folder = './joblib_memmap'
+    try:
+        os.mkdir(folder)
+    except FileExistsError:
+        pass
+
+    start = time.time()
+    result = data_augmentation(foreground, backgrounds, TRANSFORMATIONS)
+    end = time.time()
+
+    if result == 0:
+        print("Program Sequential Successfully Completed")
+    else:
+        print("Program Sequential Failed")
+
+    print(f'Sequential running took {end - start} seconds.')
+
+    # data_filename_memmap = os.path.join(folder, 'backgrounds_memmap')
+    # dump(backgrounds, data_filename_memmap)
+    # backgrounds = load(data_filename_memmap, mmap_mode='r')
     #
-    # if result == 0:
-    #     print("Program Sequential Successfully Completed")
-    # else:
-    #     print("Program Sequential Failed")
-    #
-    # print(f'Sequential running took {end - start} seconds.')
+    # data_filename_memmap = os.path.join(folder, 'foreground_memmap')
+    # dump(foreground, data_filename_memmap)
+    # foreground = load(data_filename_memmap, mmap_mode='r')
 
     start = time.time()
     local_date = datetime.datetime.now()
     new_dir_path = 'output/' + str(local_date)
     os.mkdir(new_dir_path)
-    # FIXME memory memcopy di numpy
     Parallel(n_jobs=12)(
-        delayed(data_augmentation_multiprocessing)(foreground, backgrounds, new_dir_path, i) for i in range(TRANSFORMATIONS))
+        delayed(data_augmentation_multiprocessing)(foreground, backgrounds, new_dir_path, i) for i in
+        range(TRANSFORMATIONS))
     end = time.time()
 
     print(f'Multiprocessing Running took {end - start} seconds.')
-
-    # def doppio(i):
-    #     time.sleep(i)
-    #
-    # start = time.time()
-    # doppio(5)
-    # end = time.time()
-    # print(f'Running took {end - start} seconds.')
-    #
-    # start = time.time()
-    # Parallel(n_jobs=2)(delayed(doppio)(1) for i in range(5))
-    # end = time.time()
-    # print(f'Parallel Running took {end - start} seconds.')

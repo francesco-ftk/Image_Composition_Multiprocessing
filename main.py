@@ -6,6 +6,7 @@ import datetime
 import time
 from joblib import Parallel, delayed
 
+TRANSFORMATIONS = 100
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:
     local_date = datetime.datetime.now()
@@ -51,7 +52,7 @@ def data_augmentation(foreground, backgrounds, transformations) -> int:
     return 0
 
 
-def data_augmentation_parallel(foreground, backgrounds, dir_path, count):
+def data_augmentation_multiprocessing(foreground, backgrounds, dir_path, count):
     index = random.randint(0, len(backgrounds) - 1)
     background = copy(backgrounds[index])
 
@@ -89,10 +90,6 @@ def data_augmentation_parallel(foreground, backgrounds, dir_path, count):
     cv2.imwrite(dir_path + "/quokka_" + str(count) + ".png", background)
 
 
-def doppio(i):
-    time.sleep(i)
-
-
 if __name__ == '__main__':
     background_path = "input/background/"
     foreground_path = "input/foreground/"
@@ -114,16 +111,16 @@ if __name__ == '__main__':
     else:
         print("ERROR: foreground not found at: " + foreground_path)
 
-    start = time.time()
-    result = data_augmentation(foreground, backgrounds, 100)
-    end = time.time()
-
-    if result == 0:
-        print("Program Sequential Successfully Completed")
-    else:
-        print("Program Sequential Failed")
-
-    print(f'Sequential running took {end - start} seconds.')
+    # start = time.time()
+    # result = data_augmentation(foreground, backgrounds, TRANSFORMATIONS)
+    # end = time.time()
+    #
+    # if result == 0:
+    #     print("Program Sequential Successfully Completed")
+    # else:
+    #     print("Program Sequential Failed")
+    #
+    # print(f'Sequential running took {end - start} seconds.')
 
     start = time.time()
     local_date = datetime.datetime.now()
@@ -131,11 +128,14 @@ if __name__ == '__main__':
     os.mkdir(new_dir_path)
     # FIXME memory memcopy di numpy
     Parallel(n_jobs=12)(
-        delayed(data_augmentation_parallel)(foreground, backgrounds, new_dir_path, i) for i in range(100))
+        delayed(data_augmentation_multiprocessing)(foreground, backgrounds, new_dir_path, i) for i in range(TRANSFORMATIONS))
     end = time.time()
 
     print(f'Multiprocessing Running took {end - start} seconds.')
 
+    # def doppio(i):
+    #     time.sleep(i)
+    #
     # start = time.time()
     # doppio(5)
     # end = time.time()

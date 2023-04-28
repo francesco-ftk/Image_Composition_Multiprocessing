@@ -6,7 +6,7 @@ import datetime
 import time
 from joblib import Parallel, delayed, dump, load
 
-TRANSFORMATIONS = 200
+TRANSFORMATIONS = 100
 
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:
@@ -112,11 +112,7 @@ if __name__ == '__main__':
     else:
         print("ERROR: foreground not found at: " + foreground_path)
 
-    folder = './joblib_memmap'
-    try:
-        os.mkdir(folder)
-    except FileExistsError:
-        pass
+    print("START Sequential Algorithm")
 
     start = time.time()
     result = data_augmentation(foreground, backgrounds, TRANSFORMATIONS)
@@ -129,13 +125,20 @@ if __name__ == '__main__':
 
     print(f'Sequential running took {end - start} seconds.')
 
-    # data_filename_memmap = os.path.join(folder, 'backgrounds_memmap')
-    # dump(backgrounds, data_filename_memmap)
-    # backgrounds = load(data_filename_memmap, mmap_mode='r')
-    #
-    # data_filename_memmap = os.path.join(folder, 'foreground_memmap')
-    # dump(foreground, data_filename_memmap)
-    # foreground = load(data_filename_memmap, mmap_mode='r')
+    # folder = './joblib_memmap'
+    # try:
+    #     os.mkdir(folder)
+    # except FileExistsError:
+    #     pass
+    # background_filename_memmap = os.path.join(folder, 'backgrounds_memmap')
+    # dump(backgrounds, background_filename_memmap)
+    # backgrounds = load(background_filename_memmap, mmap_mode='r')
+
+    # foreground_filename_memmap = os.path.join(folder, 'foreground_memmap')
+    # dump(foreground, foreground_filename_memmap)
+    # foreground = load(foreground_filename_memmap, mmap_mode='r')
+
+    print("START Multiprocessing Algorithm")
 
     start = time.time()
     local_date = datetime.datetime.now()

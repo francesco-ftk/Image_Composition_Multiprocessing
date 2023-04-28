@@ -150,3 +150,6 @@ if __name__ == '__main__':
     end = time.time()
 
     print(f'Multiprocessing Running took {end - start} seconds.')
+
+
+# TODO una immagine alla volta di background, 1000 trasformazioni, multiprocessing manualmente con trasformazioni/5

@@ -201,7 +201,7 @@ if __name__ == '__main__':
     os.mkdir(new_dir_path)
     # prepare arguments iterable for pool.starmap
     args = [(foreground, backgrounds, new_dir_path, trasformation_for_process) for i in range(pool_size)]
-    # pool.starmap(data_augmentation_multiprocessing, args)
+    pool.starmap(data_augmentation_multiprocessing, args)
 
     pool.close()  # no more tasks
     pool.join()  # wrap up current tasks

@@ -1,12 +1,16 @@
+import math
 import os
 import random
 from copy import copy
 import cv2
 import datetime
 import time
-from joblib import Parallel, delayed, dump, load
+from joblib import Parallel, delayed
+import multiprocessing
+from multiprocessing import Process
 
-TRANSFORMATIONS = 1000
+TRANSFORMATIONS = 120  # Usare preferibilmente multipli del PROCESSES
+PROCESSES = 12
 
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:
@@ -89,7 +93,7 @@ def data_augmentation_multiprocessing(foreground, backgrounds, dir_path, trasfor
                                                     float(b_pixel[2]) * beta_correction_factor + float(
                                                         f_pixel[2]) * alpha_correction_factor * f_alpha, 255]
 
-        cv2.imwrite(dir_path + "/quokka_" + str(i) + "_" + str(i) + ".png", background)  # TODO first i = nome thread
+        cv2.imwrite(dir_path + "/quokka_" + multiprocessing.current_process().name + "_" + str(i) + ".png", background)
 
 
 def data_augmentation_multiprocessing_one_at_a_time(foreground, background_img, dir_path, count):
@@ -152,36 +156,72 @@ if __name__ == '__main__':
         print("ERROR: foreground not found at: " + foreground_path)
 
     # SEQUENTIAL IMAGE COMPOSITION
-    # print("START Sequential Algorithm")
+    print("START Sequential Algorithm")
+
+    start = time.time()
+    result = data_augmentation(foreground, backgrounds, TRANSFORMATIONS)
+    end = time.time()
+
+    if result == 0:
+        print("Program Sequential Successfully Completed")
+    else:
+        print("Program Sequential Failed")
+
+    print(f'Sequential running took {end - start} seconds.')
+
+    # JOBLIB MULTIPROCESSING IMAGE COMPOSITION
+    # print("START Multiprocessing Joblib Algorithm")
     #
     # start = time.time()
-    # result = data_augmentation(foreground, backgrounds, TRANSFORMATIONS)
+    # local_date = datetime.datetime.now()
+    # new_dir_path = 'output/' + str(local_date)
+    # os.mkdir(new_dir_path)
+    # index = random.randint(0, len(backgrounds) - 1)
+    # background = backgrounds[index]
+    # Parallel(n_jobs=12)(
+    #     delayed(data_augmentation_multiprocessing_one_at_a_time)(foreground, background, new_dir_path, i) for i
+    #     in range(TRANSFORMATIONS))
     # end = time.time()
     #
-    # if result == 0:
-    #     print("Program Sequential Successfully Completed")
-    # else:
-    #     print("Program Sequential Failed")
-    #
-    # print(f'Sequential running took {end - start} seconds.')
+    # print(f'Multiprocessing Joblib Running took {end - start} seconds.')
 
     # MULTIPROCESSING IMAGE COMPOSITION
-    print("START Multiprocessing Algorithm")
+    print("START Pool Multiprocessing Algorithm")
 
+    # pool_size = multiprocessing.cpu_count() * 2
+    pool_size = PROCESSES
+    print("Using " + str(pool_size) + " processes")
+    pool = multiprocessing.Pool(
+        processes=pool_size,
+    )
+    trasformation_for_process = math.ceil(TRANSFORMATIONS / pool_size)
     start = time.time()
     local_date = datetime.datetime.now()
     new_dir_path = 'output/' + str(local_date)
     os.mkdir(new_dir_path)
-    index = random.randint(0, len(backgrounds) - 1)
-    background = backgrounds[index]
-    Parallel(n_jobs=12)(
-        delayed(data_augmentation_multiprocessing_one_at_a_time)(foreground, background, new_dir_path, i) for i
-        in range(TRANSFORMATIONS))
+    # prepare arguments iterable for pool.starmap
+    args = [(foreground, backgrounds, new_dir_path, trasformation_for_process) for i in range(pool_size)]
+    # pool.starmap(data_augmentation_multiprocessing, args)
+
+    pool.close()  # no more tasks
+    pool.join()  # wrap up current tasks
+
+    end = time.time()
+    print(f'Pool Multiprocessing Running took {end - start} seconds.')
+
+    print("START Multiprocessing Algorithm")
+    print("Using " + str(PROCESSES) + " processes")
+
+    trasformation_for_process = math.ceil(TRANSFORMATIONS / PROCESSES)
+    local_date = datetime.datetime.now()
+    new_dir_path = 'output/' + str(local_date)
+    os.mkdir(new_dir_path)
+    processes = [Process(target=data_augmentation_multiprocessing,
+                         args=(foreground, backgrounds, new_dir_path, trasformation_for_process,)) for i in
+                 range(PROCESSES)]
+    start = time.time()
+    [p.start() for p in processes]
+    [p.join() for p in processes]
     end = time.time()
 
     print(f'Multiprocessing Running took {end - start} seconds.')
-
-# TODO una immagine alla volta di background, NO
-#  1000 trasformazioni, NO
-#  multiprocessing manualmente con trasformazioni/5,
-#  profiling

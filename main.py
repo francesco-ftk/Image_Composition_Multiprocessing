@@ -170,20 +170,20 @@ if __name__ == '__main__':
     print(f'Sequential running took {end - start} seconds.')
 
     # JOBLIB MULTIPROCESSING IMAGE COMPOSITION
-    # print("START Multiprocessing Joblib Algorithm")
-    #
-    # start = time.time()
-    # local_date = datetime.datetime.now()
-    # new_dir_path = 'output/' + str(local_date)
-    # os.mkdir(new_dir_path)
-    # index = random.randint(0, len(backgrounds) - 1)
-    # background = backgrounds[index]
-    # Parallel(n_jobs=12)(
-    #     delayed(data_augmentation_multiprocessing_one_at_a_time)(foreground, background, new_dir_path, i) for i
-    #     in range(TRANSFORMATIONS))
-    # end = time.time()
-    #
-    # print(f'Multiprocessing Joblib Running took {end - start} seconds.')
+    print("START Multiprocessing Joblib Algorithm")
+
+    start = time.time()
+    local_date = datetime.datetime.now()
+    new_dir_path = 'output/' + str(local_date)
+    os.mkdir(new_dir_path)
+    index = random.randint(0, len(backgrounds) - 1)
+    background = backgrounds[index]
+    Parallel(n_jobs=PROCESSES)(
+        delayed(data_augmentation_multiprocessing_one_at_a_time)(foreground, background, new_dir_path, i) for i
+        in range(TRANSFORMATIONS))
+    end = time.time()
+
+    print(f'Multiprocessing Joblib Running took {end - start} seconds.')
 
     # MULTIPROCESSING IMAGE COMPOSITION
     print("START Pool Multiprocessing Algorithm")

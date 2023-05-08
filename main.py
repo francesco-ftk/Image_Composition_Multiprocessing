@@ -194,13 +194,13 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(
         processes=pool_size,
     )
-    trasformation_for_process = math.ceil(TRANSFORMATIONS / pool_size)
+    trasformations_for_process = math.ceil(TRANSFORMATIONS / pool_size)
     start = time.time()
     local_date = datetime.datetime.now()
     new_dir_path = 'output/' + str(local_date)
     os.mkdir(new_dir_path)
     # prepare arguments iterable for pool.starmap
-    args = [(foreground, backgrounds, new_dir_path, trasformation_for_process) for i in range(pool_size)]
+    args = [(foreground, backgrounds, new_dir_path, trasformations_for_process) for i in range(pool_size)]
     pool.starmap(data_augmentation_multiprocessing, args)
 
     pool.close()  # no more tasks
@@ -212,12 +212,12 @@ if __name__ == '__main__':
     print("START Multiprocessing Algorithm")
     print("Using " + str(PROCESSES) + " processes")
 
-    trasformation_for_process = math.ceil(TRANSFORMATIONS / PROCESSES)
+    trasformations_for_process = math.ceil(TRANSFORMATIONS / PROCESSES)
     local_date = datetime.datetime.now()
     new_dir_path = 'output/' + str(local_date)
     os.mkdir(new_dir_path)
     processes = [Process(target=data_augmentation_multiprocessing,
-                         args=(foreground, backgrounds, new_dir_path, trasformation_for_process,)) for i in
+                         args=(foreground, backgrounds, new_dir_path, trasformations_for_process,)) for i in
                  range(PROCESSES)]
     start = time.time()
     [p.start() for p in processes]

@@ -9,8 +9,8 @@ from joblib import Parallel, delayed
 import multiprocessing
 from multiprocessing import Process
 
-TRANSFORMATIONS = 120  # Usare preferibilmente multipli del PROCESSES
-PROCESSES = 12
+TRANSFORMATIONS = 1800  # Usare preferibilmente multipli del PROCESSES
+PROCESSES = 18
 
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:

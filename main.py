@@ -9,9 +9,8 @@ from joblib import Parallel, delayed
 import multiprocessing
 from multiprocessing import Process
 
-TRANSFORMATIONS = 1800  # Usare preferibilmente multipli del PROCESSES
-PROCESSES = 18
-
+TRANSFORMATIONS = 1200  # Usare preferibilmente multipli del PROCESSES
+PROCESSES = 12
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:
     local_date = datetime.datetime.now()

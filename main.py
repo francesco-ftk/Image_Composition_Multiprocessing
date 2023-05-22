@@ -11,6 +11,7 @@ from multiprocessing import Process
 
 TRANSFORMATIONS = 1200  # Usare preferibilmente multipli del PROCESSES
 PROCESSES = 12
+# TODO se numero di trasformazioni non multiplo di processi ottenere non meno immagini in output
 
 def data_augmentation(foreground, backgrounds, transformations) -> int:
     local_date = datetime.datetime.now()
